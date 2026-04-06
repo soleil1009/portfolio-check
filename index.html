@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>資産配分チェック | Soleil FP</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1a3353;
+    --navy-light: #2d5480;
+    --navy-dark: #112238;
+    --gold: #c9a84c;
+    --gold-light: #e8d08a;
+    --gold-pale: #f5edd8;
+    --cream: #f8f5ef;
+    --cream-dark: #ede8de;
+    --text: #1a1a2e;
+    --text-muted: #6b7280;
+    --text-light: #9ca3af;
+    --white: #ffffff;
+    --shadow: 0 4px 24px rgba(26,51,83,0.10);
+    --shadow-lg: 0 8px 48px rgba(26,51,83,0.16);
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Header ── */
+  .site-header {
+    background: var(--navy);
+    padding: 14px 20px;
+    text-align: center;
+  }
+  .site-header span {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    color: var(--gold);
+    letter-spacing: 0.08em;
+  }
+
+  /* ── Wrapper ── */
+  .wrapper {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 0 16px 60px;
+  }
+
+  /* ── Screens ── */
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeUp 0.35s ease both; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Intro Screen ── */
+  .intro-hero {
+    background: var(--navy);
+    margin: 0 -16px;
+    padding: 44px 32px 36px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .intro-hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(201,168,76,0.08);
+  }
+  .intro-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: -40px;
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    background: rgba(201,168,76,0.06);
+  }
+  .intro-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--gold);
+    border: 1px solid rgba(201,168,76,0.4);
+    border-radius: 20px;
+    padding: 4px 14px;
+    margin-bottom: 20px;
+  }
+  .intro-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--white);
+    line-height: 1.4;
+    margin-bottom: 20px;
+  }
+  .intro-title em {
+    color: var(--gold-light);
+    font-style: normal;
+  }
+  .intro-desc {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.75);
+    line-height: 1.8;
+  }
+
+  .intro-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 24px 20px;
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+  }
+  .intro-card-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+    margin-bottom: 14px;
+  }
+  .intro-points {
+    list-style: none;
+  }
+  .intro-points li {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--cream-dark);
+    padding-left: 16px;
+    position: relative;
+  }
+  .intro-points li:last-child { border-bottom: none; }
+  .intro-points li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--gold);
+    font-size: 0.75rem;
+  }
+
+  .intro-meta {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .intro-meta-item {
+    flex: 1;
+    background: var(--white);
+    border-radius: 10px;
+    padding: 14px 12px;
+    text-align: center;
+    box-shadow: var(--shadow);
+  }
+  .intro-meta-item .num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--navy);
+    line-height: 1;
+  }
+  .intro-meta-item .num span { font-size: 0.85rem; }
+  .intro-meta-item .label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .note-text {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    text-align: center;
+    line-height: 1.7;
+    margin-bottom: 28px;
+  }
+
+  /* ── Progress ── */
+  .progress-wrap {
+    padding: 20px 0 4px;
+  }
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .progress-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+  }
+  .progress-count {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+  }
+  .progress-bar-bg {
+    height: 4px;
+    background: var(--cream-dark);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    border-radius: 2px;
+    transition: width 0.45s ease;
+  }
+
+  /* ── Question ── */
+  .question-number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    color: var(--gold);
+    letter-spacing: 0.06em;
+    margin: 20px 0 10px;
+  }
+  .question-text {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--navy);
+    line-height: 1.55;
+    margin-bottom: 22px;
+  }
+
+  /* ── Options ── */
+  .options { display: flex; flex-direction: column; gap: 10px; }
+
+  .option-btn {
+    width: 100%;
+    background: var(--white);
+    border: 1.5px solid var(--cream-dark);
+    border-radius: 10px;
+    padding: 15px 16px;
+    text-align: left;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.88rem;
+    color: var(--text);
+    line-height: 1.55;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(26,51,83,0.05);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .option-btn:hover {
+    border-color: var(--gold);
+    background: var(--gold-pale);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(26,51,83,0.10);
+  }
+  .option-btn.selected {
+    border-color: var(--navy);
+    background: var(--navy);
+    color: var(--white);
+    box-shadow: 0 4px 16px rgba(26,51,83,0.25);
+  }
+
+  /* ── Back ── */
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px 0;
+    margin-top: 16px;
+    font-family: 'Noto Sans JP', sans-serif;
+    transition: color 0.2s;
+  }
+  .back-btn:hover { color: var(--navy); }
+  .back-btn::before { content: '←'; }
+
+  /* ── Result ── */
+  .result-hero {
+    background: var(--navy);
+    margin: 0 -16px;
+    padding: 36px 28px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .result-hero::before {
+    content: '';
+    position: absolute;
+    top: -50px; right: -50px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: rgba(201,168,76,0.07);
+  }
+  .result-pattern {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: var(--gold);
+    border: 1px solid rgba(201,168,76,0.4);
+    border-radius: 20px;
+    padding: 4px 14px;
+    margin-bottom: 16px;
+  }
+  .result-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.6;
+  }
+
+  .result-body {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 24px 20px;
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+    font-size: 0.87rem;
+    color: var(--text);
+    line-height: 1.9;
+  }
+
+  .result-points {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin: 0 0 20px;
+    box-shadow: var(--shadow);
+  }
+  .result-points-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+    margin-bottom: 14px;
+  }
+  .result-point-item {
+    font-size: 0.83rem;
+    color: var(--text-muted);
+    line-height: 1.65;
+    padding: 7px 0 7px 14px;
+    border-bottom: 1px solid var(--cream-dark);
+    position: relative;
+  }
+  .result-point-item:last-child { border-bottom: none; }
+  .result-point-item::before {
+    content: '·';
+    position: absolute;
+    left: 0;
+    color: var(--gold);
+    font-size: 1.2rem;
+    line-height: 1.3;
+  }
+
+  /* ── CTA ── */
+  .cta-box {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-dark) 100%);
+    border-radius: var(--radius);
+    padding: 28px 20px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .cta-box p {
+    font-size: 0.83rem;
+    color: rgba(255,255,255,0.8);
+    line-height: 1.8;
+    margin-bottom: 20px;
+  }
+  .cta-btn {
+    display: block;
+    width: 100%;
+    background: linear-gradient(135deg, var(--gold), #b8941e);
+    color: var(--navy-dark);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    padding: 16px 20px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: opacity 0.2s, transform 0.2s;
+    line-height: 1.4;
+  }
+  .cta-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  .retry-btn {
+    display: block;
+    width: 100%;
+    background: none;
+    border: 1.5px solid var(--cream-dark);
+    border-radius: 8px;
+    padding: 13px 20px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.83rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .retry-btn:hover { border-color: var(--navy); color: var(--navy); }
+
+  /* ── Primary Button ── */
+  .primary-btn {
+    display: block;
+    width: 100%;
+    background: linear-gradient(135deg, var(--navy), var(--navy-dark));
+    color: var(--white);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    padding: 18px 20px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s;
+    box-shadow: 0 4px 20px rgba(26,51,83,0.3);
+    letter-spacing: 0.04em;
+  }
+  .primary-btn:hover { opacity: 0.92; transform: translateY(-1px); }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <span>Soleil FP</span>
+</header>
+
+<div class="wrapper">
+
+  <!-- ── INTRO ── -->
+  <div id="screen-intro" class="screen active">
+    <div class="intro-hero">
+      <div class="intro-badge">PORTFOLIO CHECK</div>
+      <h1 class="intro-title">今の<em>資産配分</em>に<br>偏りはないですか？</h1>
+      <p class="intro-desc">5つの質問で、今のお金の置き方を<br>ざっくり整理できます。</p>
+    </div>
+
+    <div class="intro-meta" style="margin-top:20px;">
+      <div class="intro-meta-item">
+        <div class="num">5<span>問</span></div>
+        <div class="label">質問数</div>
+      </div>
+      <div class="intro-meta-item">
+        <div class="num">3<span>分</span></div>
+        <div class="label">所要時間</div>
+      </div>
+      <div class="intro-meta-item">
+        <div class="num">4<span>種</span></div>
+        <div class="label">結果パターン</div>
+      </div>
+    </div>
+
+    <div class="intro-card">
+      <div class="intro-card-title">このチェックで確認できること</div>
+      <ul class="intro-points">
+        <li>今のお金の置き方に偏りがないか</li>
+        <li>短期で使うお金と長期資金が分かれているか</li>
+        <li>制度活用と資産配分が噛み合っているか</li>
+        <li>自分で意図を持って配分できているか</li>
+      </ul>
+    </div>
+
+    <p class="note-text">
+      このチェックは商品提案や売買判断を行うものではありません。<br>
+      今の配分を整理するための簡易ツールです。
+    </p>
+
+    <button class="primary-btn" onclick="startCheck()">チェックを始める</button>
+  </div>
+
+  <!-- ── QUESTIONS ── -->
+  <div id="screen-q" class="screen">
+    <div class="progress-wrap">
+      <div class="progress-meta">
+        <span class="progress-label">QUESTION</span>
+        <span class="progress-count" id="progress-count">1 / 5</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-fill" style="width:20%"></div>
+      </div>
+    </div>
+
+    <p class="question-number" id="q-number">Q1</p>
+    <p class="question-text" id="q-text"></p>
+    <div class="options" id="q-options"></div>
+    <button class="back-btn" id="back-btn" onclick="goBack()">前の質問に戻る</button>
+  </div>
+
+  <!-- ── RESULT ── -->
+  <div id="screen-result" class="screen">
+    <div class="result-hero">
+      <div class="result-pattern" id="result-pattern"></div>
+      <h2 class="result-title" id="result-title"></h2>
+    </div>
+
+    <div class="result-body" id="result-body"></div>
+
+    <div class="result-points" id="result-points-wrap">
+      <div class="result-points-title">POINT</div>
+      <div id="result-points"></div>
+    </div>
+
+    <div class="cta-box">
+      <p>今の配分を見直す時は、<br>投資だけでなく、家計・保険・将来の予定も<br>まとめて見ることで判断しやすくなります。</p>
+      <a href="https://b-soleil.com" class="cta-btn" id="cta-btn">全体を整理したい方はこちら</a>
+    </div>
+
+    <button class="retry-btn" onclick="resetCheck()">もう一度チェックする</button>
+  </div>
+
+</div>
+
+<script>
+const questions = [
+  {
+    text: "現在の金融資産に近いものを選んでください。",
+    options: [
+      "ほとんど現金・預金",
+      "現金が中心だが、NISAや投信も少しある",
+      "現金・投資が半々くらい",
+      "投資の割合がかなり高い",
+      "よく分からない"
+    ]
+  },
+  {
+    text: "投資しているお金は、いつ使う予定のない資金ですか？",
+    options: [
+      "3年以内に使う予定のお金も含まれている",
+      "使う予定が近いお金はあまり含まれていない",
+      "ほぼ長期で置いておけるお金",
+      "分からない"
+    ]
+  },
+  {
+    text: "今の運用先に近いものを選んでください。",
+    options: [
+      "ほぼ1つの商品・1つの国に偏っている",
+      "2〜3種類あるが、かなり偏りはある",
+      "ある程度分かれている",
+      "自分でも分散を意識している",
+      "分からない"
+    ]
+  },
+  {
+    text: "制度の使い方に近いものを選んでください。",
+    options: [
+      "課税口座が中心で、制度はあまり使えていない",
+      "NISAは使っているが、なんとなく使っている",
+      "NISAなどをある程度意識して使っている",
+      "制度の目的を理解して使っている",
+      "分からない"
+    ]
+  },
+  {
+    text: "今の資産配分について、一番近い気持ちはどれですか？",
+    options: [
+      "正直、何をどれだけ持つべきか分からない",
+      "周りやSNSを見て何となく決めている",
+      "大きく間違ってはいないと思うが自信はない",
+      "ある程度意図を持って配分している"
+    ]
+  }
+];
+
+const results = {
+  A: {
+    pattern: "PATTERN A",
+    title: "今は「運用の中身」より先に、使うお金の整理が大事そうです",
+    body: `今の状態は、「何を持つか」より先に、
+使う予定のお金と、長く置いておけるお金が
+きちんと分かれているかを確認した方がよさそうです。
+
+短期で使うお金まで値動きのある資産に入っていると、
+必要な時に取り崩しづらくなることがあります。
+
+まずは、生活防衛資金・近い将来の支出・長期資金を分けて考えると、
+判断しやすくなります。`,
+    points: [
+      "短期資金と長期資金は分けて考える",
+      "何を買うかより、どのお金をどこに置くかが大事"
+    ]
+  },
+  B: {
+    pattern: "PATTERN B",
+    title: "今の配分は、少し偏りが強い可能性があります",
+    body: `今の資産配分は、特定の国や商品に偏っている可能性があります。
+
+偏り自体が悪いとは限りませんが、
+値動きの理由が1つに集中しやすくなるため、
+想定以上に振れやすくなることがあります。
+
+大事なのは、何を持っているかより、
+「なぜその配分にしているか」を言葉にできるかです。
+一度、預金・保険・NISA・投資信託などを並べて、
+全体のバランスを見直してみると整理しやすくなります。`,
+    points: [
+      "偏りは「悪い」ではなく「理由が必要」",
+      "SNSの情報ではなく、自分の目的に合わせて考える"
+    ]
+  },
+  C: {
+    pattern: "PATTERN C",
+    title: "制度は使えていても、配分の意図が少し曖昧かもしれません",
+    body: `制度はある程度使えていても、
+「なんとなく使っている」状態に近い可能性があります。
+
+非課税であることと、
+自分に合っていることは別です。
+
+今の配分が、
+使う時期・必要な金額・値動きへの耐性に合っているかを
+一度確認しておくと、制度の使い方もかなり変わります。`,
+    points: [
+      "制度とリスクは別で考える",
+      "何を買うかより、どのお金をどこに置くかが大事"
+    ]
+  },
+  D: {
+    pattern: "PATTERN D",
+    title: "今の配分は、比較的整理できていそうです",
+    body: `今の資産配分は、大きく崩れている印象はありません。
+
+ただし、問題がないことと、
+目的に合っていることは別です。
+
+教育費、住宅、老後など、
+使う時期が違うお金を同じルールで置いていないかだけは、
+定期的に見直す価値があります。`,
+    points: [
+      "短期資金と長期資金は分けて考える",
+      "何を買うかより、どのお金をどこに置くかが大事"
+    ]
+  }
+};
+
+let current = 0;
+let answers = [];
+
+function startCheck() {
+  showScreen('screen-q');
+  renderQuestion(0);
+}
+
+function renderQuestion(idx) {
+  current = idx;
+  const q = questions[idx];
+  const total = questions.length;
+  const pct = ((idx + 1) / total) * 100;
+
+  document.getElementById('progress-count').textContent = `${idx + 1} / ${total}`;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('q-number').textContent = `Q${idx + 1}`;
+  document.getElementById('q-text').textContent = q.text;
+
+  const container = document.getElementById('q-options');
+  container.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt;
+    if (answers[idx] === i) btn.classList.add('selected');
+    btn.addEventListener('click', () => selectAnswer(i));
+    container.appendChild(btn);
+  });
+
+  document.getElementById('back-btn').style.visibility = idx === 0 ? 'hidden' : 'visible';
+}
+
+function selectAnswer(optIdx) {
+  answers[current] = optIdx;
+
+  // Highlight
+  document.querySelectorAll('.option-btn').forEach((b, i) => {
+    b.classList.toggle('selected', i === optIdx);
+  });
+
+  setTimeout(() => {
+    if (current < questions.length - 1) {
+      renderQuestion(current + 1);
+    } else {
+      showResult();
+    }
+  }, 280);
+}
+
+function goBack() {
+  if (current > 0) renderQuestion(current - 1);
+}
+
+function showResult() {
+  const pattern = judge();
+  const r = results[pattern];
+
+  document.getElementById('result-pattern').textContent = r.pattern;
+  document.getElementById('result-title').textContent = r.title;
+  document.getElementById('result-body').innerHTML = r.body.split('\n').map(l => l.trim() ? `<p>${l}</p>` : '<br>').join('');
+
+  const ptContainer = document.getElementById('result-points');
+  ptContainer.innerHTML = r.points.map(p =>
+    `<div class="result-point-item">${p}</div>`
+  ).join('');
+
+  // UTM source from URL
+  const params = new URLSearchParams(window.location.search);
+  const source = params.get('source') || '';
+  const ctaBase = 'https://b-soleil.com';
+  document.getElementById('cta-btn').href = source ? `${ctaBase}?source=${source}` : ctaBase;
+
+  showScreen('screen-result');
+}
+
+function judge() {
+  const a = answers; // 0-indexed option values
+
+  // Q1: 0=ほぼ現金, 1=現金中心, 2=半々, 3=投資高い, 4=わからない
+  // Q2: 0=3年以内使う, 1=あまり含まない, 2=ほぼ長期, 3=わからない
+  // Q3: 0=1商品偏り, 1=2-3種偏り, 2=ある程度分散, 3=分散意識, 4=わからない
+  // Q4: 0=課税中心, 1=NISA雰囲気, 2=ある程度意識, 3=目的理解, 4=わからない
+  // Q5: 0=わからない, 1=SNS参考, 2=多分合ってる, 3=意図あり
+
+  const q1 = a[0], q2 = a[1], q3 = a[2], q4 = a[3], q5 = a[4];
+
+  // Pattern A
+  if (
+    q2 === 0 ||
+    (q2 === 3 && q1 === 3) ||
+    (q1 === 4 && (q2 === 0 || q2 === 3))
+  ) return 'A';
+
+  // Pattern B
+  if (
+    q3 === 0 ||
+    q3 === 1 ||
+    (q3 === 4 && (q5 === 0 || q5 === 1))
+  ) return 'B';
+
+  // Pattern C
+  if (
+    q4 === 0 ||
+    q4 === 1 ||
+    q4 === 4 ||
+    q5 === 0 ||
+    q5 === 1
+  ) return 'C';
+
+  return 'D';
+}
+
+function resetCheck() {
+  answers = [];
+  current = 0;
+  showScreen('screen-intro');
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  el.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
