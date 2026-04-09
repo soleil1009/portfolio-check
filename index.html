@@ -74,6 +74,8 @@
 
   .cta-box { background: var(--cream); border-radius: var(--radius); padding: 24px 20px; margin-bottom: 16px; text-align: center; }
   .cta-box p { font-size: 0.82rem; color: var(--text-muted); line-height: 1.8; margin-bottom: 18px; }
+  .copy-btn { display: block; width: 100%; background: white; color: var(--navy); border: 1.5px solid var(--navy); border-radius: 12px; padding: 14px 20px; font-family: 'Noto Sans JP', sans-serif; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: all 0.2s; text-align: center; margin-bottom: 8px; }
+  .copy-btn:hover { background: var(--cream); }
   .cta-btn { display: block; width: 100%; background: var(--navy); color: var(--white); font-family: 'Noto Sans JP', sans-serif; font-size: 0.9rem; font-weight: 700; border: none; border-radius: 12px; padding: 16px 20px; cursor: pointer; text-decoration: none; transition: opacity 0.2s; text-align: center; }
   .cta-btn:hover { opacity: 0.85; }
 
@@ -133,7 +135,7 @@
       <div class="result-points-title">POINT</div>
       <div id="result-points"></div>
     </div>
-    <button class="retry-btn" onclick="copyResult()" style="margin-bottom:10px;">📋 この結果をコピーしてLINEで保存する</button>
+    <button class="copy-btn" onclick="copyResult()">📋 この結果をコピーしてLINEで保存する</button>
     <a href="#" class="cta-btn" id="cta-btn">LINEに戻る</a>
     <button class="retry-btn" onclick="resetCheck()">↺ もう一度試す</button>
   </div>
