@@ -60,7 +60,6 @@
   .back-btn { display: inline-flex; align-items: center; gap: 4px; font-size: 0.78rem; color: var(--text-light); background: none; border: none; cursor: pointer; padding: 10px 0; margin-top: 8px; font-family: 'Noto Sans JP', sans-serif; }
   .back-btn:hover { color: var(--text-muted); }
 
-  .result-label { display: inline-block; font-size: 1.15rem; font-weight: 700; letter-spacing: 0.08em; color: white; background: var(--gold); border-radius: 24px; padding: 7px 22px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(201, 168, 76, 0.35); }
   .result-title { font-size: 1.35rem; font-weight: 700; color: var(--navy); line-height: 1.6; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--cream-dark); }
   .result-body { font-size: 0.87rem; color: var(--text); line-height: 1.9; margin-bottom: 24px; }
   .result-body p { margin-bottom: 0.8em; }
@@ -128,7 +127,6 @@
   </div>
 
   <div id="screen-result" class="screen">
-    <div class="result-label" id="result-pattern"></div>
     <h2 class="result-title" id="result-title"></h2>
     <div class="result-body" id="result-body"></div>
     <div class="result-points">
@@ -192,7 +190,6 @@ function goBack() { if (current > 0) renderQuestion(current-1); }
 
 function showResult() {
   const r = results[judge()];
-  document.getElementById('result-pattern').textContent = r.pattern;
   document.getElementById('result-title').textContent = r.title;
   document.getElementById('result-body').innerHTML = r.body.split('\n').map(l => l ? `<p>${l}</p>` : '').join('');
   document.getElementById('result-points').innerHTML = r.points.map(p => `<div class="result-point-item">${p}</div>`).join('');
